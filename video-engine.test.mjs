@@ -20,4 +20,4 @@ test("falls back safely when product fields are empty",()=>{
   assert.equal(timeline.width,1080);
   assert.equal(timeline.height,1920);
   assert.ok(timeline.scenes.every(s=>typeof s.text==="string"));
-});
+});\ntest("supports 15 and 30 second presets",()=>{\n  assert.equal(createVideoTimeline({durationSec:15}).durationMs,15000);\n  assert.equal(createVideoTimeline({durationSec:30}).durationMs,30000);\n});\n
