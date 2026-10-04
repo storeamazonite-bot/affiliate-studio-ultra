@@ -1,22 +1,23 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AffiliAI Ultra</title><link rel="stylesheet" href="/styles.css"></head>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#ffffff"><title>AffiliAI Ultra — Premium Affiliate Studio</title><link rel="stylesheet" href="/styles.css"></head>
 <body>
-<header class="topbar"><div class="brand"><span class="mark">A</span><div><b>AffiliAI Ultra</b><small>Premium Affiliate Campaign Studio</small></div></div><span class="status">LOCAL WORKSPACE</span></header>
+<header class="topbar"><div class="brand"><span class="mark">A</span><div><b>AffiliAI Ultra</b><small>Premium Affiliate Campaign Studio</small></div></div><span class="status">PRIVATE WORKSPACE</span></header>
 <main class="shell">
-<section class="hero"><div><span class="eyebrow">HOME SECURITY • AFFILIATE MARKETING</span><h1>Turn one product into a complete campaign.</h1><p>Generate premium campaign copy from your real product image, description and affiliate link.</p></div><div class="markets">ENGLISH-FIRST<br><b>USA • UK • CANADA • EUROPE</b></div></section>
+<section class="hero"><div><span class="eyebrow">HOME SECURITY • AFFILIATE MARKETING</span><h1>One product.<br><em>Every campaign.</em></h1><p>Create premium affiliate assets for landing pages and social channels using your real product image, description and tracking link.</p></div><div class="markets"><span>ENGLISH-FIRST</span><b>USA • UK • CANADA • EUROPE</b><small>Built for affiliate discovery, not checkout.</small></div></section>
 <section class="workspace">
-<aside class="panel form"><div class="panelhead"><h2>Product Campaign</h2><span>01</span></div>
+<aside class="panel form"><div class="panelhead"><h2>Product Campaign</h2><span>01 / INPUT</span></div>
 <label>Product name<input id="productName" placeholder="Smart 4K Outdoor Camera"></label>
-<label>Affiliate URL<input id="affiliateUrl" type="url" placeholder="https://..."></label>
-<label>Description / features<textarea id="description" rows="7" placeholder="Paste product description, features and benefits."></textarea></label>
+<label>Affiliate URL<input id="affiliateUrl" type="url" placeholder="https://your-affiliate-link..."></label>
+<label>Description / features<textarea id="description" rows="7" placeholder="Paste the real product description, features and benefits."></textarea></label>
 <div class="row"><label>Market<select id="market"><option>United States</option><option>United Kingdom</option><option>Canada</option><option>Europe</option></select></label><label>Channel<select id="channel"><option>Landing Page</option><option>TikTok</option><option>Facebook</option><option>Pinterest</option></select></label></div>
-<label class="upload">Real product image<input id="imageInput" type="file" accept="image/*"><span id="imageName">Choose image</span></label><div id="preview" class="preview hidden"><img id="previewImg" alt="Product preview"></div>
+<label class="upload">Real product image<input id="imageInput" type="file" accept="image/*"><span id="imageName">Choose your product image</span></label><div id="preview" class="preview hidden"><img id="previewImg" alt="Real product preview"></div>
 <button id="generateBtn" class="primary">Generate Campaign <span>→</span></button><p id="notice"></p></aside>
 <section class="panel studio"><div class="panelhead"><h2>Campaign Studio</h2><span id="mode">READY</span></div>
-<nav class="tabs"><button class="tab active" data-tab="landing">Landing Page</button><button class="tab" data-tab="tiktok">TikTok</button><button class="tab" data-tab="facebook">Facebook</button><button class="tab" data-tab="pinterest">Pinterest</button></nav>
+<nav class="tabs"><button class="tab active" data-tab="landing">Landing Page</button><button class="tab" data-tab="tiktok">TikTok</button><button class="tab" data-tab="facebook">Facebook</button><button class="tab" data-tab="pinterest">Pinterest</button><button class="tab" data-tab="image">Marketing Image</button></nav>
 <div class="outputhead"><div><span class="eyebrow">GENERATED ASSET</span><h3 id="outputTitle">Your campaign starts here</h3></div><div class="actions"><button id="copyBtn">Copy</button><button id="downloadBtn">Download</button></div></div>
-<textarea id="output" class="output" placeholder="Your campaign will appear here." spellcheck="false"></textarea>
+<textarea id="output" class="output" placeholder="Your generated campaign will appear here." spellcheck="false"></textarea>
+<div id="visual" class="visual hidden"><div class="visual-card"><img id="visualImg" alt="Marketing creative preview"><div><b>Marketing creative concept</b><small>Uses your uploaded product image as the visual source.</small></div></div></div>
 <div class="video"><div><b>Video brief</b><small>9:16 TikTok / Reels / Shorts concept</small></div><button id="videoBtn">Create Video Brief →</button></div>
 <p class="disclosure">Affiliate disclosure: This content may contain affiliate links. We may earn a commission from qualifying purchases, at no additional cost to you.</p>
 </section></section></main><script src="/app.js"></script></body></html>
