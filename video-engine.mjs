@@ -1,19 +1,15 @@
 const clean=value=>String(value??"").trim();
 
-export function createVideoTimeline({product,description,affiliateUrl}={}){
+export function createVideoTimeline({product,description,affiliateUrl,durationSec=22}={}){
   const name=clean(product)||"Smart Home Security Product";
   const detail=clean(description)||"Modern security technology for a more connected home.";
   const link=clean(affiliateUrl)||"[INSERT AFFILIATE LINK]";
-  return {
-    width:1080,
-    height:1920,
-    durationMs:22000,
-    scenes:[
-      {id:"hook",startMs:0,endMs:3000,text:"Could your home security be smarter?"},
-      {id:"product",startMs:3000,endMs:8000,text:name},
-      {id:"benefit",startMs:8000,endMs:16000,text:detail},
-      {id:"cta",startMs:16000,endMs:22000,text:"Discover Product"}
-    ],
-    affiliateUrl:link
-  };
+  const durationMs=Math.max(15,Math.min(30,Number(durationSec)||22))*1000;
+  const hook=Math.round(durationMs*.14),productEnd=Math.round(durationMs*.36),benefitEnd=Math.round(durationMs*.73);
+  return {width:1080,height:1920,durationMs,scenes:[
+    {id:"hook",startMs:0,endMs:hook,text:"Could your home security be smarter?"},
+    {id:"product",startMs:hook,endMs:productEnd,text:name},
+    {id:"benefit",startMs:productEnd,endMs:benefitEnd,text:detail},
+    {id:"cta",startMs:benefitEnd,endMs:durationMs,text:"Discover Product"}
+  ],affiliateUrl:link};
 }
