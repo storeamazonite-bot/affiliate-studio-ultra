@@ -3,6 +3,7 @@
   "version":"1.0.0",
   "private":true,
   "type":"module",
-  "scripts":{"start":"node server.js","test":"node --test"},
-  "dependencies":{"ffmpeg-static":"^5.2.0"}
+  "scripts":{"start":"node server.js","test":"node --test","desktop":"electron .","dist":"electron-builder --win portable"},
+  "dependencies":{"ffmpeg-static":"^5.2.0"},
+  "devDependencies":{"electron":"^38.0.0","electron-builder":"^26.0.12"}
 }
