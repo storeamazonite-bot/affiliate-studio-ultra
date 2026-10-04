@@ -9,7 +9,7 @@ $("imageInput").onchange=e=>{const f=e.target.files?.[0];if(!f)return;$("imageNa
 $("generateBtn").onclick=generate;
 $("copyBtn").onclick=async()=>{await navigator.clipboard.writeText($("output").value);$("notice").textContent="Copied to clipboard."};
 $("downloadBtn").onclick=()=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([$("output").value],{type:"text/plain"}));a.download="affiliate-campaign.txt";a.click();URL.revokeObjectURL(a.href)};
-$("videoBtn").onclick=buildVideo;
+$("videoBtn").onclick=buildVideo;\n$("convertMp4Btn").onclick=convertMp4;
 $("downloadVideoBtn").onclick=downloadVideo;
 
 function data(){return{n:$("productName").value.trim()||"Smart Home Security Product",u:$("affiliateUrl").value.trim()||"[INSERT AFFILIATE LINK]",d:$("description").value.trim()||"Modern security technology designed to support a safer, more connected home.",m:$("market").value,c:$("channel").value}}
@@ -109,7 +109,7 @@ ${p.u}
 FORMAT
 9:16 vertical • TikTok / Reels / Shorts`}
 
-function resetVideo(){if(state.videoUrl)URL.revokeObjectURL(state.videoUrl);state.videoBlob=null;state.videoUrl="";$("downloadVideoBtn").disabled=true;$("videoStage").classList.add("hidden");$("videoProgress").textContent="READY";$("videoStatus").textContent="Upload a product image, then build the video."}
+function resetVideo(){if(state.videoUrl)URL.revokeObjectURL(state.videoUrl);state.videoBlob=null;state.videoUrl="";$("downloadVideoBtn").disabled=true;$("convertMp4Btn").disabled=true;$("videoStage").classList.add("hidden");$("videoProgress").textContent="READY";$("videoStatus").textContent="Upload a product image, then build the video."}
 
 function loadImage(src){return new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=reject;img.src=src})}
 
@@ -133,8 +133,8 @@ async function buildVideo(){const p=data();if(!state.imageData){$("notice").text
 $("videoStage").classList.remove("hidden");$("videoBtn").disabled=true;$("downloadVideoBtn").disabled=true;$("mode").textContent="RENDERING VIDEO";$("videoStatus").textContent="Rendering a real 1080 × 1920 vertical video locally…";
 const timeline=createVideoTimeline({product:p.n,description:p.d,affiliateUrl:p.u,durationSec:Number($("videoDuration").value)||22});const canvas=$("videoCanvas"),ctx=canvas.getContext("2d");const img=await loadImage(state.imageData);const stream=canvas.captureStream(30);const mime=MediaRecorder.isTypeSupported("video/webm;codecs=vp9")?"video/webm;codecs=vp9":MediaRecorder.isTypeSupported("video/webm;codecs=vp8")?"video/webm;codecs=vp8":"video/webm";const recorder=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:7000000});const chunks=[];recorder.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};const finished=new Promise(resolve=>recorder.onstop=resolve);recorder.start(250);const start=performance.now();
 await new Promise(resolve=>{const frame=now=>{const elapsed=Math.min(timeline.durationMs,now-start);drawScene(ctx,timeline,img,elapsed);$("videoProgress").textContent=Math.round(elapsed/timeline.durationMs*100)+"%";if(elapsed<timeline.durationMs){requestAnimationFrame(frame)}else{setTimeout(()=>{recorder.stop();resolve()},150)}};requestAnimationFrame(frame)});await finished;
-state.videoBlob=new Blob(chunks,{type:"video/webm"});if(state.videoUrl)URL.revokeObjectURL(state.videoUrl);state.videoUrl=URL.createObjectURL(state.videoBlob);$("downloadVideoBtn").disabled=false;$("videoBtn").disabled=false;$("mode").textContent="VIDEO READY";$("videoStatus").textContent="Your 9:16 video is ready. Download the WebM file and publish it to TikTok, Reels or Shorts.";$("videoProgress").textContent="100%";$("notice").textContent="Vertical video created locally — no paid video API required."}
+state.videoBlob=new Blob(chunks,{type:"video/webm"});if(state.videoUrl)URL.revokeObjectURL(state.videoUrl);state.videoUrl=URL.createObjectURL(state.videoBlob);$("downloadVideoBtn").disabled=false;$("convertMp4Btn").disabled=false;$("videoBtn").disabled=false;$("mode").textContent="VIDEO READY";$("videoStatus").textContent="Your 9:16 video is ready. Download the WebM file and publish it to TikTok, Reels or Shorts.";$("videoProgress").textContent="100%";$("notice").textContent="Vertical video created locally — no paid video API required."}
 
 function downloadVideo(){if(!state.videoUrl)return;const a=document.createElement("a");a.href=state.videoUrl;a.download="affiliai-ultra-9x16-video.webm";document.body.appendChild(a);a.click();a.remove();$("notice").textContent="Video download started."}
 
-updateTitle();
+updateTitle();\nasync function convertMp4(){if(!state.videoBlob)return;$("convertMp4Btn").disabled=true;$("convertMp4Btn").textContent="Converting…";$("notice").textContent="Converting the vertical video to MP4 locally…";try{const reader=new FileReader();const base64=await new Promise((resolve,reject)=>{reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(state.videoBlob)});const r=await fetch("/api/convert-mp4",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({videoBase64:base64})});if(!r.ok)throw Error("MP4 conversion failed");const blob=await r.blob();const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="affiliai-ultra-9x16-video.mp4";document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);$("notice").textContent="MP4 download started."}catch(e){$("notice").textContent="MP4 export failed. You can still download the WebM version."}finally{$("convertMp4Btn").disabled=false;$("convertMp4Btn").textContent="Export MP4"}}
