@@ -24,7 +24,8 @@
     "files": [
       "**/*",
       "!.github/**",
-      "!dist/**"
+      "!dist/**",
+      "!electron-main.mjs"
     ],
     "win": {
       "target": [
