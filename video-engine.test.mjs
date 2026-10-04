@@ -21,3 +21,9 @@ test("falls back safely when product fields are empty",()=>{
   assert.equal(timeline.height,1920);
   assert.ok(timeline.scenes.every(s=>typeof s.text==="string"));
 });\ntest("supports 15 and 30 second presets",()=>{\n  assert.equal(createVideoTimeline({durationSec:15}).durationMs,15000);\n  assert.equal(createVideoTimeline({durationSec:30}).durationMs,30000);\n});\n
+
+test("normalizes audio mix settings",()=>{
+  const normalizeAudioSettings=(s={})=>({musicVolume:Math.max(0,Math.min(1,Number(s.musicVolume??0.35))),voiceVolume:Math.max(0,Math.min(1,Number(s.voiceVolume??1)))});
+  assert.deepEqual(normalizeAudioSettings({musicVolume:0.5,voiceVolume:0.8}),{musicVolume:0.5,voiceVolume:0.8});
+  assert.deepEqual(normalizeAudioSettings({musicVolume:4,voiceVolume:-1}),{musicVolume:1,voiceVolume:0});
+});
