@@ -41,7 +41,7 @@ async function generateAIVideo(){
   if(!state.imageData){$("notice").textContent="Upload the real product image first.";return}
   $("aiVideoBtn").disabled=true;$("mode").textContent="AI VIDEO";$("notice").textContent="Sending the product to the real AI video generator…";$("videoStage").classList.remove("hidden");$("videoStatus").textContent="AI generation in progress…";
   try{
-    const r=await fetch("/api/generate-video",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({product:p.n,description:p.d,affiliateUrl:p.u,imageData:state.imageData,durationSec:Number($("videoDuration").value)||15})});
+    const r=await fetch("/api/generate-video",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({product:p.n,description:p.d,affiliateUrl:p.u,imageData:state.imageData,durationSec:Math.min(15,Number($("videoDuration").value)||15)})});
     const j=await r.json();if(!r.ok||!j.taskId)throw Error(j.error||"AI video generation failed");
     let status="PENDING",task;
     while(status!=="SUCCEEDED"&&status!=="FAILED"&&status!=="CANCELED"){
@@ -49,11 +49,13 @@ async function generateAIVideo(){
       const s=await fetch("/api/video-status/"+encodeURIComponent(j.taskId));task=await s.json();if(!s.ok)throw Error(task.error||"AI video status failed");status=task.status;$("videoProgress").textContent=status;
     }
     if(status!=="SUCCEEDED"||!task.output?.[0])throw Error("AI video generation did not complete successfully.");
-    const a=document.createElement("a");a.href=task.output[0];a.target="_blank";a.rel="noopener";a.textContent="Open AI video";a.className="ai-video-link";$("aiVideoResult").replaceChildren(a);$("aiVideoResult").classList.remove("hidden");$("videoStatus").textContent="Real AI video generated. Save the file locally because the provider URL is temporary.";
+    const a=document.createElement("a");a.href=task.output[0];a.target="_blank";a.rel="noopener";a.textContent="Open AI video";a.className="ai-video-link";const d=document.createElement("button");d.textContent="Download AI Video";d.className="dark ai-video-download";d.onclick=()=>downloadAIVideo(task.output[0]);$("aiVideoResult").replaceChildren(a,d);$("aiVideoResult").classList.remove("hidden");$("videoStatus").textContent="Real AI video generated. Save the file locally because the provider URL is temporary.";
     $("mode").textContent="AI VIDEO READY";$("notice").textContent="Real product-specific AI video generated.";
   }catch(e){$("mode").textContent="AI ERROR";$("notice").textContent=e.message||"AI video generation failed.";$("videoStatus").textContent="AI generation failed."}
   finally{$("aiVideoBtn").disabled=false}
 }
+
+async function downloadAIVideo(url){try{const r=await fetch(url);if(!r.ok)throw Error();const blob=await r.blob();const u=URL.createObjectURL(blob);const a=document.createElement("a");a.href=u;a.download="affiliai-ultra-ai-video.mp4";document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);$("notice").textContent="AI video download started."}catch(e){window.open(url,"_blank");$("notice").textContent="The provider opened the video because direct download was blocked by the browser."}}
 
 function imageCopy(p){$("output").value=`MARKETING IMAGE CREATIVE
 
