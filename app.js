@@ -1,7 +1,9 @@
 import {createVideoTimeline} from "./video-engine.mjs";
 import {normalizeAudioSettings} from "./audio-engine.mjs";
 
-const state={tab:"landing",imageData:"",videoBlob:null,videoUrl:"",musicFile:null,voiceFile:null};const $=id=>document.getElementById(id);
+const state={tab:"landing",imageData:"",videoBlob:null,videoUrl:"",musicFile:null,voiceFile:null};
+const ASSET_KEY="affiliai_ultra_assets_v1";
+let assets=loadAssets();const $=id=>document.getElementById(id);
 
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");state.tab=b.dataset.tab;$( "visual").classList.toggle("hidden",state.tab!=="image");updateTitle()});
 
@@ -31,7 +33,7 @@ async function generateAIImage(){
   try{
     const r=await fetch("/api/generate-image",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({product:p.n,description:p.d,affiliateUrl:p.u,imageData:state.imageData,style:$("imageStyle").value,ratio:$("imageRatio").value})});
     const j=await r.json();if(!r.ok||!j.imageData)throw Error(j.error||"Image generation failed");
-    $("aiImage").src=j.imageData;$("aiImageResult").classList.remove("hidden");$("notice").textContent="Real AI marketing image generated.";$("mode").textContent="AI IMAGE READY";
+    $("aiImage").src=j.imageData;$("aiImageResult").classList.remove("hidden"); const asset=createAsset({type:"image",product:p.n,url:j.imageData,affiliateUrl:p.u,title:$("imageStyle").value}); assets.unshift(asset);saveAssets();renderAssetGallery();$("notice").textContent="Real AI marketing image generated.";$("mode").textContent="AI IMAGE READY";
   }catch(e){$("notice").textContent=e.message||"AI image generation failed.";$("mode").textContent="AI ERROR"}
   finally{$("aiImageBtn").disabled=false}
 }
@@ -49,13 +51,19 @@ async function generateAIVideo(){
       const s=await fetch("/api/video-status/"+encodeURIComponent(j.taskId));task=await s.json();if(!s.ok)throw Error(task.error||"AI video status failed");status=task.status;$("videoProgress").textContent=status;
     }
     if(status!=="SUCCEEDED"||!task.output?.[0])throw Error("AI video generation did not complete successfully.");
-    const a=document.createElement("a");a.href=task.output[0];a.target="_blank";a.rel="noopener";a.textContent="Open AI video";a.className="ai-video-link";const d=document.createElement("button");d.textContent="Download AI Video";d.className="dark ai-video-download";d.onclick=()=>downloadAIVideo(task.output[0]);$("aiVideoResult").replaceChildren(a,d);$("aiVideoResult").classList.remove("hidden");$("videoStatus").textContent="Real AI video generated. Save the file locally because the provider URL is temporary.";
+    const asset=createAsset({type:"video",product:p.n,url:task.output[0],affiliateUrl:p.u,title:"AI Product Video"}); assets.unshift(asset);saveAssets();renderAssetGallery(); const a=document.createElement("a");a.href=task.output[0];a.target="_blank";a.rel="noopener";a.textContent="Open AI video";a.className="ai-video-link";const d=document.createElement("button");d.textContent="Download AI Video";d.className="dark ai-video-download";d.onclick=()=>downloadAIVideo(task.output[0]);$("aiVideoResult").replaceChildren(a,d);$("aiVideoResult").classList.remove("hidden");$("videoStatus").textContent="Real AI video generated. Save the file locally because the provider URL is temporary.";
     $("mode").textContent="AI VIDEO READY";$("notice").textContent="Real product-specific AI video generated.";
   }catch(e){$("mode").textContent="AI ERROR";$("notice").textContent=e.message||"AI video generation failed.";$("videoStatus").textContent="AI generation failed."}
   finally{$("aiVideoBtn").disabled=false}
 }
 
 async function downloadAIVideo(url){try{const r=await fetch(url);if(!r.ok)throw Error();const blob=await r.blob();const u=URL.createObjectURL(blob);const a=document.createElement("a");a.href=u;a.download="affiliai-ultra-ai-video.mp4";document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);$("notice").textContent="AI video download started."}catch(e){window.open(url,"_blank");$("notice").textContent="The provider opened the video because direct download was blocked by the browser."}}
+
+function loadAssets(){try{return JSON.parse(localStorage.getItem(ASSET_KEY)||"[]")}catch{return[]}}
+function saveAssets(){localStorage.setItem(ASSET_KEY,JSON.stringify(assets.slice(0,100)))}
+function renderAssetGallery(){const box=$("assetGallery"),empty=$("emptyAssets");if(!box)return;const filtered=filterAssets(assets,{type:$("assetTypeFilter")?.value||"all",product:$("assetSearch")?.value||""});box.replaceChildren();$("assetCount").textContent=assets.length;empty.classList.toggle("hidden",filtered.length>0);filtered.forEach(asset=>{const card=document.createElement("article");card.className="asset-card";const media=asset.type==="video"?document.createElement("video"):document.createElement("img");media.src=asset.url;media.controls=asset.type==="video";media.alt=asset.title;media.className="asset-media";card.append(media);const meta=document.createElement("div");meta.className="asset-meta";meta.innerHTML=`<span>${assetTypeLabel(asset.type)}</span><b></b><small>${new Date(asset.createdAt).toLocaleString()}</small>`;meta.querySelector("b").textContent=asset.product;const actions=document.createElement("div");actions.className="asset-actions";const open=document.createElement("a");open.href=asset.url;open.target="_blank";open.textContent="Preview";const dl=document.createElement("button");dl.textContent="Download";dl.onclick=()=>downloadAIVideo(asset.url);const copy=document.createElement("button");copy.textContent="Copy Affiliate";copy.onclick=()=>navigator.clipboard.writeText(asset.affiliateUrl);actions.append(open,dl,copy);card.append(meta,actions);box.append(card)})}
+$("assetTypeFilter")?.addEventListener("change",renderAssetGallery);$("assetSearch")?.addEventListener("input",renderAssetGallery);$("clearAssets")?.addEventListener("click",()=>{assets=[];saveAssets();renderAssetGallery()});
+renderAssetGallery();
 
 function imageCopy(p){$("output").value=`MARKETING IMAGE CREATIVE
 
