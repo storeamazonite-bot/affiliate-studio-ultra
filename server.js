@@ -22,9 +22,9 @@ async function generateVideo(body){
   const key=process.env.RUNWAYML_API_SECRET;
   if(!key)throw Error("RUNWAYML_API_SECRET is not configured");
   const p=normalizeCreativeInput(body);
-  const seconds=Math.max(4,Math.min(30,Number(body.durationSec)||15));
+  const seconds=Math.max(4,Math.min(15,Number(body.durationSec)||15));
   const userConcept=buildVideoBrief({...p,durationSec:seconds});
-  const r=await fetch("https://api.dev.runwayml.com/v1/recipes/product_ad",{method:"POST",headers:{"Content-Type":"application/json","Authorization":`Bearer ${key}`,"X-Runway-Version":"2024-11-06"},body:JSON.stringify({version:"2026-07",productImages:[{uri:body.imageData}],productInfo:`${p.product}. ${p.description}`,userConcept,duration:seconds})});
+  const r=await fetch("https://api.dev.runwayml.com/v1/recipes/product_ad",{method:"POST",headers:{"Content-Type":"application/json","Authorization":`Bearer ${key}`,"X-Runway-Version":"2024-11-06"},body:JSON.stringify({version:"2026-07",productImages:[{uri:body.imageData}],ratio:"720:1280",audio:true,productInfo:`${p.product}. ${p.description}`,userConcept,duration:seconds})});
   const j=await r.json();
   if(!r.ok)throw Error(j?.error||j?.message||"Video generation failed");
   return {taskId:j.id,durationSec:seconds,affiliateUrl:p.affiliateUrl};
@@ -43,6 +43,6 @@ const server=http.createServer(async(req,res)=>{if(req.method==="POST"&&req.url=
 try{let raw="";for await(const c of req)raw+=c;const out=await generateImage(JSON.parse(raw));send(res,200,"application/json",JSON.stringify(out))}catch(e){send(res,500,"application/json",JSON.stringify({error:e.message}))}return}
 if(req.method==="POST"&&req.url==="/api/generate-video"){
 try{let raw="";for await(const c of req)raw+=c;const out=await generateVideo(JSON.parse(raw));send(res,200,"application/json",JSON.stringify(out))}catch(e){send(res,500,"application/json",JSON.stringify({error:e.message}))}return}
-if(req.method==="GET"&&req.url.startsWith("/api/video-status/")){
+if(req.method==="GET"&&req.url.startsWith("/api/video-download/")){try{const id=decodeURIComponent(req.url.split("/").pop());const task=await videoStatus(id);const url=task.output?.[0];if(task.status!=="SUCCEEDED"||!url)throw Error("Video is not ready.");const r=await fetch(url);if(!r.ok)throw Error("Provider download failed.");res.writeHead(200,{"Content-Type":r.headers.get("content-type")||"video/mp4","Content-Disposition":`attachment; filename="affiliai-ultra-ai-video.mp4"`});for await(const chunk of r.body)res.write(chunk);res.end()}catch(e){send(res,500,"application/json",JSON.stringify({error:e.message}))}return}if(req.method==="GET"&&req.url.startsWith("/api/video-status/")){
 try{const id=decodeURIComponent(req.url.split("/").pop());const out=await videoStatus(id);send(res,200,"application/json",JSON.stringify(out))}catch(e){send(res,500,"application/json",JSON.stringify({error:e.message}))}return}
 if(req.method==="POST"&&req.url==="/api/generate"){try{let raw="";for await(const c of req)raw+=c;const out=await ai(JSON.parse(raw));send(res,200,"application/json",JSON.stringify({output:out}))}catch(e){send(res,500,"application/json",JSON.stringify({error:"Generation failed"}))}return}const requested=req.url==="/"?"index.html":req.url.replace(/^\//,"");const file=path.join(root,requested);if(!file.startsWith(root)||!fs.existsSync(file)||fs.statSync(file).isDirectory()){send(res,404,"text/plain; charset=utf-8","Not found");return}send(res,200,mime[path.extname(file)]||"application/octet-stream",fs.readFileSync(file))});server.listen(port,()=>console.log(`AffiliAI Ultra running at http://localhost:${port}`));
