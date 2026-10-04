@@ -10,7 +10,7 @@ async function generateImage(body){
   const prompt=buildImagePrompt({...p,style:body.style,ratio:body.ratio});
   const content=[{type:"input_text",text:prompt}];
   if(body.imageData)content.push({type:"input_image",image_url:body.imageData});
-  const r=await fetch("https://api.openai.com/v1/responses",{method:"POST",headers:{"Content-Type":"application/json","Authorization":`Bearer ${key}`},body:JSON.stringify({model,input:[{role:"user",content}],tools:[{type:"image_generation"}]})});
+  const r=await fetch("https://api.openai.com/v1/responses",{method:"POST",headers:{"Content-Type":"application/json","Authorization":`Bearer ${key}`},body:JSON.stringify({model:process.env.OPENAI_MODEL||"gpt-5.5",input:[{role:"user",content}],tools:[{type:"image_generation",model,action:"edit",size:"1024x1536",quality:"high",output_format:"png"}],tool_choice:{type:"image_generation"}})});
   const j=await r.json();
   if(!r.ok)throw Error(j?.error?.message||"Image generation failed");
   const call=j.output?.find(x=>x.type==="image_generation_call");
