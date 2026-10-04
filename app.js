@@ -13,6 +13,8 @@ $("voiceInput").onchange=e=>{state.voiceFile=e.target.files?.[0]||null;$("voiceN
 $("copyBtn").onclick=async()=>{await navigator.clipboard.writeText($("output").value);$("notice").textContent="Copied to clipboard."};
 $("downloadBtn").onclick=()=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([$("output").value],{type:"text/plain"}));a.download="affiliate-campaign.txt";a.click();URL.revokeObjectURL(a.href)};
 $("videoBtn").onclick=buildVideo;
+$("aiImageBtn").onclick=generateAIImage;
+$("aiVideoBtn").onclick=generateAIVideo;
 $("convertMp4Btn").onclick=convertMp4;
 $("downloadVideoBtn").onclick=downloadVideo;
 
@@ -21,6 +23,37 @@ function data(){return{n:$("productName").value.trim()||"Smart Home Security Pro
 function updateTitle(){const x={landing:"Premium Landing Page",tiktok:"TikTok • 9:16",facebook:"Facebook Campaign",pinterest:"Pinterest Pin",image:"Marketing Image"};$("outputTitle").textContent=x[state.tab]}
 
 async function generate(){const p=data();$("mode").textContent="GENERATING";$("notice").textContent="Building your premium campaign…";if(state.tab==="image"){imageCopy(p);$("mode").textContent="VISUAL MODE";$("notice").textContent=state.imageData?"Real product image loaded into the creative workspace.":"Upload a real product image to build the visual.";return}try{const r=await fetch("/api/generate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({...p,tab:state.tab})});const j=await r.json();if(!r.ok||!j.output)throw Error();$("output").value=j.output;$("mode").textContent="AI MODE";$("notice").textContent="Campaign generated."}catch(e){$("output").value=local(p);$("mode").textContent="LOCAL MODE";$("notice").textContent="Local generator used. Connect an AI provider for richer generation."}updateTitle()}
+
+async function generateAIImage(){
+  const p=data();
+  if(!state.imageData){$("notice").textContent="Upload the real product image first.";return}
+  $("aiImageBtn").disabled=true;$("mode").textContent="AI IMAGE";$("notice").textContent="Generating a real product-specific marketing image…";
+  try{
+    const r=await fetch("/api/generate-image",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({product:p.n,description:p.d,affiliateUrl:p.u,imageData:state.imageData,style:$("imageStyle").value,ratio:$("imageRatio").value})});
+    const j=await r.json();if(!r.ok||!j.imageData)throw Error(j.error||"Image generation failed");
+    $("aiImage").src=j.imageData;$("aiImageResult").classList.remove("hidden");$("notice").textContent="Real AI marketing image generated.";$("mode").textContent="AI IMAGE READY";
+  }catch(e){$("notice").textContent=e.message||"AI image generation failed.";$("mode").textContent="AI ERROR"}
+  finally{$("aiImageBtn").disabled=false}
+}
+
+async function generateAIVideo(){
+  const p=data();
+  if(!state.imageData){$("notice").textContent="Upload the real product image first.";return}
+  $("aiVideoBtn").disabled=true;$("mode").textContent="AI VIDEO";$("notice").textContent="Sending the product to the real AI video generator…";$("videoStage").classList.remove("hidden");$("videoStatus").textContent="AI generation in progress…";
+  try{
+    const r=await fetch("/api/generate-video",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({product:p.n,description:p.d,affiliateUrl:p.u,imageData:state.imageData,durationSec:Number($("videoDuration").value)||15})});
+    const j=await r.json();if(!r.ok||!j.taskId)throw Error(j.error||"AI video generation failed");
+    let status="PENDING",task;
+    while(status!=="SUCCEEDED"&&status!=="FAILED"&&status!=="CANCELED"){
+      await new Promise(resolve=>setTimeout(resolve,5000));
+      const s=await fetch("/api/video-status/"+encodeURIComponent(j.taskId));task=await s.json();if(!s.ok)throw Error(task.error||"AI video status failed");status=task.status;$("videoProgress").textContent=status;
+    }
+    if(status!=="SUCCEEDED"||!task.output?.[0])throw Error("AI video generation did not complete successfully.");
+    const a=document.createElement("a");a.href=task.output[0];a.target="_blank";a.rel="noopener";a.textContent="Open AI video";a.className="ai-video-link";$("aiVideoResult").replaceChildren(a);$("aiVideoResult").classList.remove("hidden");$("videoStatus").textContent="Real AI video generated. Save the file locally because the provider URL is temporary.";
+    $("mode").textContent="AI VIDEO READY";$("notice").textContent="Real product-specific AI video generated.";
+  }catch(e){$("mode").textContent="AI ERROR";$("notice").textContent=e.message||"AI video generation failed.";$("videoStatus").textContent="AI generation failed."}
+  finally{$("aiVideoBtn").disabled=false}
+}
 
 function imageCopy(p){$("output").value=`MARKETING IMAGE CREATIVE
 
