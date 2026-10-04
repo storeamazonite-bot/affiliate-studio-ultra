@@ -1,9 +1,40 @@
 {
-  "name":"affiliate-studio-ultra",
-  "version":"1.0.0",
-  "private":true,
-  "type":"module",
-  "scripts":{"start":"node server.js","test":"node --test","desktop":"electron .","dist":"electron-builder --win portable"},
-  "dependencies":{"ffmpeg-static":"^5.2.0"},
-  "devDependencies":{"electron":"^38.0.0","electron-builder":"^26.0.12"}
+  "name": "affiliate-studio-ultra",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test",
+    "desktop": "electron .",
+    "dist": "electron-builder --win portable"
+  },
+  "dependencies": {
+    "ffmpeg-static": "^5.2.0"
+  },
+  "devDependencies": {
+    "electron": "^38.0.0",
+    "electron-builder": "^26.0.12"
+  },
+  "main": "electron-main.mjs",
+  "build": {
+    "appId": "com.affiliai.ultra",
+    "productName": "AffiliAI Ultra",
+    "files": [
+      "**/*",
+      "!.github/**",
+      "!dist/**"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "artifactName": "AffiliAI-Ultra-${version}-${arch}.${ext}"
+  }
 }
