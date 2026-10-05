@@ -31,8 +31,8 @@ async function generateVideo(body){
   return {taskId:j.id,durationSec:seconds,affiliateUrl:p.affiliateUrl};
 }
 
-async function videoStatus(id){
-  const key=process.env.RUNWAYML_API_SECRET;
+async function videoStatus(id,requestSecret=""){
+  const key=requestSecret||process.env.RUNWAYML_API_SECRET;
   if(!key)throw Error("RUNWAYML_API_SECRET is not configured");
   const r=await fetch(`https://api.dev.runwayml.com/v1/tasks/${encodeURIComponent(id)}`,{headers:{"Authorization":`Bearer ${key}`,"X-Runway-Version":"2024-11-06"}});
   const j=await r.json();
