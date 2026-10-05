@@ -3,7 +3,7 @@ import {createVideoTimeline} from "./video-engine.mjs";
 import {normalizeAudioSettings} from "./audio-engine.mjs";
 
 const state={tab:"landing",imageData:"",videoBlob:null,videoUrl:"",musicFile:null,voiceFile:null};
-const ASSET_KEY="affiliai_ultra_assets_v1";
+const ASSET_KEY="affiliai_ultra_assets_v1";\nconst SETTINGS_KEY="affiliai_ultra_settings_v1";\nconst settings=loadSettings();
 let assets=loadAssets();const $=id=>document.getElementById(id);
 
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");state.tab=b.dataset.tab;$( "visual").classList.toggle("hidden",state.tab!=="image");updateTitle()});
@@ -21,18 +21,18 @@ $("aiVideoBtn").onclick=generateAIVideo;
 $("convertMp4Btn").onclick=convertMp4;
 $("downloadVideoBtn").onclick=downloadVideo;
 
-function data(){return{n:$("productName").value.trim()||"Smart Home Security Product",u:$("affiliateUrl").value.trim()||"[INSERT AFFILIATE LINK]",d:$("description").value.trim()||"Modern security technology designed to support a safer, more connected home.",m:$("market").value,c:$("channel").value}}
+function loadSettings(){try{return JSON.parse(localStorage.getItem(SETTINGS_KEY)||"{}")}catch{return{}}}\nfunction saveSettings(){localStorage.setItem(SETTINGS_KEY,JSON.stringify({openaiApiKey:$("openaiKey").value.trim(),runwayApiSecret:$("runwayKey").value.trim()}));$("notice").textContent="AI settings saved on this PC."}\n$("openaiKey").value=settings.openaiApiKey||"";$("runwayKey").value=settings.runwayApiSecret||"";$("saveSettings").onclick=saveSettings;\nfunction auth(){return{openaiApiKey:$("openaiKey").value.trim(),runwayApiSecret:$("runwayKey").value.trim()}}\nfunction data(){return{n:$("productName").value.trim()||"Smart Home Security Product",u:$("affiliateUrl").value.trim()||"[INSERT AFFILIATE LINK]",d:$("description").value.trim()||"Modern security technology designed to support a safer, more connected home.",m:$("market").value,c:$("channel").value}}
 
 function updateTitle(){const x={landing:"Premium Landing Page",tiktok:"TikTok • 9:16",facebook:"Facebook Campaign",pinterest:"Pinterest Pin",image:"Marketing Image"};$("outputTitle").textContent=x[state.tab]}
 
-async function generate(){const p=data();$("mode").textContent="GENERATING";$("notice").textContent="Building your premium campaign…";if(state.tab==="image"){imageCopy(p);$("mode").textContent="VISUAL MODE";$("notice").textContent=state.imageData?"Real product image loaded into the creative workspace.":"Upload a real product image to build the visual.";return}try{const r=await fetch("/api/generate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({...p,tab:state.tab})});const j=await r.json();if(!r.ok||!j.output)throw Error();$("output").value=j.output;$("mode").textContent="AI MODE";$("notice").textContent="Campaign generated."}catch(e){$("output").value=local(p);$("mode").textContent="LOCAL MODE";$("notice").textContent="Local generator used. Connect an AI provider for richer generation."}updateTitle()}
+async function generate(){const p=data();$("mode").textContent="GENERATING";$("notice").textContent="Building your premium campaign…";if(state.tab==="image"){imageCopy(p);$("mode").textContent="VISUAL MODE";$("notice").textContent=state.imageData?"Real product image loaded into the creative workspace.":"Upload a real product image to build the visual.";return}try{const r=await fetch("/api/generate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({...p,...auth(),tab:state.tab})});const j=await r.json();if(!r.ok||!j.output)throw Error();$("output").value=j.output;$("mode").textContent="AI MODE";$("notice").textContent="Campaign generated."}catch(e){$("output").value=local(p);$("mode").textContent="LOCAL MODE";$("notice").textContent="Local generator used. Connect an AI provider for richer generation."}updateTitle()}
 
 async function generateAIImage(){
   const p=data();
   if(!state.imageData){$("notice").textContent="Upload the real product image first.";return}
   $("aiImageBtn").disabled=true;$("mode").textContent="AI IMAGE";$("notice").textContent="Generating a real product-specific marketing image…";
   try{
-    const r=await fetch("/api/generate-image",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({product:p.n,description:p.d,affiliateUrl:p.u,imageData:state.imageData,style:$("imageStyle").value,ratio:$("imageRatio").value})});
+    const r=await fetch("/api/generate-image",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({product:p.n,description:p.d,affiliateUrl:p.u,imageData:state.imageData,style:$("imageStyle").value,ratio:$("imageRatio").value,...auth()})});
     const j=await r.json();if(!r.ok||!j.imageData)throw Error(j.error||"Image generation failed");
     $("aiImage").src=j.imageData;$("aiImageResult").classList.remove("hidden"); const asset=createAsset({type:"image",product:p.n,url:j.imageData,affiliateUrl:p.u,title:$("imageStyle").value}); assets.unshift(asset);saveAssets();renderAssetGallery();$("notice").textContent="Real AI marketing image generated.";$("mode").textContent="AI IMAGE READY";
   }catch(e){$("notice").textContent=e.message||"AI image generation failed.";$("mode").textContent="AI ERROR"}
@@ -44,12 +44,12 @@ async function generateAIVideo(){
   if(!state.imageData){$("notice").textContent="Upload the real product image first.";return}
   $("aiVideoBtn").disabled=true;$("mode").textContent="AI VIDEO";$("notice").textContent="Sending the product to the real AI video generator…";$("videoStage").classList.remove("hidden");$("videoStatus").textContent="AI generation in progress…";
   try{
-    const r=await fetch("/api/generate-video",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({product:p.n,description:p.d,affiliateUrl:p.u,imageData:state.imageData,durationSec:Math.min(15,Number($("videoDuration").value)||15)})});
+    const r=await fetch("/api/generate-video",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({product:p.n,description:p.d,affiliateUrl:p.u,imageData:state.imageData,durationSec:Math.min(15,Number($("videoDuration").value)||15),...auth()})});
     const j=await r.json();if(!r.ok||!j.taskId)throw Error(j.error||"AI video generation failed");
     let status="PENDING",task;
     while(status!=="SUCCEEDED"&&status!=="FAILED"&&status!=="CANCELED"){
       await new Promise(resolve=>setTimeout(resolve,5000));
-      const s=await fetch("/api/video-status/"+encodeURIComponent(j.taskId));task=await s.json();if(!s.ok)throw Error(task.error||"AI video status failed");status=task.status;$("videoProgress").textContent=status;
+      const s=await fetch("/api/video-status/"+encodeURIComponent(j.taskId),{headers:{"x-runway-api-secret":$("runwayKey").value.trim()}});task=await s.json();if(!s.ok)throw Error(task.error||"AI video status failed");status=task.status;$("videoProgress").textContent=status;
     }
     if(status!=="SUCCEEDED"||!task.output?.[0])throw Error("AI video generation did not complete successfully.");
     const asset=createAsset({type:"video",product:p.n,url:task.output[0],affiliateUrl:p.u,title:"AI Product Video",taskId:j.taskId}); assets.unshift(asset);saveAssets();renderAssetGallery(); const a=document.createElement("a");a.href=task.output[0];a.target="_blank";a.rel="noopener";a.textContent="Open AI video";a.className="ai-video-link";const d=document.createElement("button");d.textContent="Download AI Video";d.className="dark ai-video-download";d.onclick=()=>downloadAIVideo(task.output[0],j.taskId);$("aiVideoResult").replaceChildren(a,d);$("aiVideoResult").classList.remove("hidden");$("videoStatus").textContent="Real AI video generated. Save the file locally because the provider URL is temporary.";
