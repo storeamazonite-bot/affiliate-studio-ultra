@@ -1,6 +1,6 @@
 const {app,BrowserWindow,shell,utilityProcess}=require("electron");
 const path=require("path");
-const isWindows7=process.platform==="win32"&&/^6\\.1\\./.test(process.getSystemVersion());
+const isWindows7=process.platform==="win32"&&/^6\.1\./.test(process.getSystemVersion());
 if(isWindows7)app.disableHardwareAcceleration();
 
 let child=null;
