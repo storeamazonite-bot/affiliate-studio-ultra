@@ -4,7 +4,7 @@ Premium local affiliate marketing workspace for home-security products.
 
 ## Windows 7 edition
 
-The Windows build uses Electron 22.3.27 because Electron 22 is the last major Electron release that supports Windows 7/8/8.1. Electron 23 and later do not support those systems. citeturn2search0turn2search9
+The Windows build uses Electron 22.3.27 because Electron 22 is the last major Electron release that supports Windows 7/8/8.1. Electron 23 and later do not support those systems.
 
 Build output:
 - `AffiliAI-Ultra-1.0.0-Win7-x64.exe`
@@ -36,7 +36,7 @@ Runway:
 - Vertical output uses `720:1280`.
 - Duration is limited to 4–15 seconds for the real AI video API.
 
-Runway's current Product Ad documentation confirms these inputs and limits. citeturn1search1
+Runway's current Product Ad documentation confirms these inputs and limits.
 
 ## Local video mode
 
