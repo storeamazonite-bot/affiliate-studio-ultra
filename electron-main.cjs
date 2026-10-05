@@ -1,5 +1,7 @@
 const {app,BrowserWindow,shell,utilityProcess}=require("electron");
 const path=require("path");
+const isWindows7=process.platform==="win32"&&/^6\\.1\\./.test(process.getSystemVersion());
+if(isWindows7)app.disableHardwareAcceleration();
 
 let child=null;
 let output="";
@@ -28,9 +30,9 @@ function startBackend(){
 app.whenReady().then(async()=>{
   const port=await startBackend();
   const win=new BrowserWindow({
-    width:1440,height:950,minWidth:1100,minHeight:700,
+    width:1180,height:780,minWidth:980,minHeight:620,
     backgroundColor:"#faf9f6",
-    webPreferences:{contextIsolation:true,nodeIntegration:false}
+    webPreferences:{contextIsolation:true,nodeIntegration:false,spellcheck:false}
   });
   await win.loadURL("http://localhost:"+port);
   win.webContents.setWindowOpenHandler(({url})=>{
