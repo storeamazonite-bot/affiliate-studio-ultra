@@ -37,7 +37,7 @@ jobs:
         shell: pwsh
         run: |
           if (Test-Path dist/win-unpacked) {
-            Compress-Archive -Path dist/affiliai-ultra-win-unpacked/* -DestinationPath dist/AffiliAI-Ultra-Win7-x64.zip -Force
+            Compress-Archive -Path dist/win-unpacked/* -DestinationPath dist/AffiliAI-Ultra-Win7-x64.zip -Force
           } else {
             throw "Unpacked Windows build folder was not found."
           }
