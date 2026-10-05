@@ -2,9 +2,9 @@ import fetch from "node-fetch";
 import http from "node:http";import fs from "node:fs";import path from "node:path";import {fileURLToPath} from "node:url";import {spawn} from "node:child_process";import ffmpegPath from "ffmpeg-static";import {buildImagePrompt,buildVideoBrief,normalizeCreativeInput} from "./ai-creative.mjs";
 const root=path.dirname(fileURLToPath(import.meta.url)),port=Number(process.env.PORT||3000),mime={".html":"text/html; charset=utf-8",".css":"text/css; charset=utf-8",".js":"text/javascript; charset=utf-8",".json":"application/json; charset=utf-8"};
 function send(res,s,t,b){res.writeHead(s,{"Content-Type":t});res.end(b)}
-async function ai(b){const key=process.env.OPENAI_API_KEY,model=process.env.OPENAI_MODEL;if(!key||!model)return null;const prompt=`Create premium English-first affiliate marketing copy. Product: ${b.n}. Market: ${b.m}. Affiliate URL: ${b.u}. Description: ${b.d}. Output type: ${b.tab}. Do not invent specifications, prices, guarantees, reviews, certifications, shipping claims or performance figures. Keep the affiliate URL exactly as supplied.`;const r=await fetch("https://api.openai.com/v1/responses",{method:"POST",headers:{"Content-Type":"application/json","Authorization":`Bearer ${key}`},body:JSON.stringify({model,input:prompt})});if(!r.ok)return null;const j=await r.json();return j.output_text||null}
+async function ai(b){const key=b.openaiApiKey||process.env.OPENAI_API_KEY,model=b.openaiModel||process.env.OPENAI_MODEL||"gpt-5.5";if(!key||!model)return null;const prompt=`Create premium English-first affiliate marketing copy. Product: ${b.n}. Market: ${b.m}. Affiliate URL: ${b.u}. Description: ${b.d}. Output type: ${b.tab}. Do not invent specifications, prices, guarantees, reviews, certifications, shipping claims or performance figures. Keep the affiliate URL exactly as supplied.`;const r=await fetch("https://api.openai.com/v1/responses",{method:"POST",headers:{"Content-Type":"application/json","Authorization":`Bearer ${key}`},body:JSON.stringify({model,input:prompt})});if(!r.ok)return null;const j=await r.json();return j.output_text||null}
 async function generateImage(body){
-  const key=process.env.OPENAI_API_KEY;
+  const key=body.openaiApiKey||process.env.OPENAI_API_KEY;
   const model=process.env.OPENAI_IMAGE_MODEL||"gpt-image-2";
   if(!key)throw Error("OPENAI_API_KEY is not configured");
   const p=normalizeCreativeInput(body);
@@ -20,7 +20,7 @@ async function generateImage(body){
 }
 
 async function generateVideo(body){
-  const key=process.env.RUNWAYML_API_SECRET;
+  const key=body.runwayApiSecret||process.env.RUNWAYML_API_SECRET;
   if(!key)throw Error("RUNWAYML_API_SECRET is not configured");
   const p=normalizeCreativeInput(body);
   const seconds=Math.max(4,Math.min(15,Number(body.durationSec)||15));
