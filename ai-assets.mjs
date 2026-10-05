@@ -1,6 +1,6 @@
 const clean=value=>String(value??"").trim();
 
-export function createAsset({type,product,url,affiliateUrl,thumbnailUrl="",title=""}={}){
+export function createAsset({type,product,url,affiliateUrl,thumbnailUrl="",title="",taskId=""}={}){
   return {
     id:`asset_${Date.now()}_${Math.random().toString(36).slice(2,8)}`,
     type:type==="video"?"video":"image",
@@ -8,7 +8,7 @@ export function createAsset({type,product,url,affiliateUrl,thumbnailUrl="",title
     url:clean(url),
     thumbnailUrl:clean(thumbnailUrl)||clean(url),
     affiliateUrl:clean(affiliateUrl),
-    title:clean(title)||`AI ${type==="video"?"Video":"Image"}`,
+    title:clean(title)||`AI ${type==="video"?"Video":"Image"}`,taskId:clean(taskId),
     createdAt:new Date().toISOString()
   };
 }
