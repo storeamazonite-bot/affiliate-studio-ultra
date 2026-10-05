@@ -7,7 +7,7 @@
     "start": "node server.js",
     "test": "node --test",
     "desktop": "electron .",
-    "dist": "electron-builder --win portable"
+    "dist": "electron-builder --win dir"
   },
   "dependencies": {
     "ffmpeg-static": "^5.2.0",
@@ -30,7 +30,7 @@
     "win": {
       "target": [
         {
-          "target": "portable",
+          "target": "dir",
           "arch": [
             "x64"
           ]
