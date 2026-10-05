@@ -24,10 +24,10 @@ jobs:
       - run: node --check video-engine.mjs
       - run: node --check audio-engine.mjs
       - run: npm run dist
-      - name: Smoke test packaged desktop app
+      - name: Smoke test unpacked desktop app
         shell: pwsh
         run: |
-          $exe = Get-ChildItem -Path dist -Filter "*Win7-x64.exe" | Select-Object -First 1
+          $exe = Get-ChildItem -Path dist -Recurse -Filter "AffiliAI Ultra.exe" | Select-Object -First 1
           if (-not $exe) { throw "Windows executable was not produced." }
           $p = Start-Process -FilePath $exe.FullName -PassThru
           Start-Sleep -Seconds 10
@@ -36,4 +36,13 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: affiliai-ultra-windows
-          path: dist/*Win7-x64.exe
+          path: dist/**
+
+      - name: Create Windows ZIP distribution
+        shell: pwsh
+        run: |
+          if (Test-Path dist/affiliai-ultra-win-unpacked) {
+            Compress-Archive -Path dist/affiliai-ultra-win-unpacked/* -DestinationPath dist/AffiliAI-Ultra-Win7-x64.zip -Force
+          } else {
+            throw "Unpacked Windows build folder was not found."
+          }
