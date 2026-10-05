@@ -3,7 +3,9 @@ import {createVideoTimeline} from "./video-engine.mjs";
 import {normalizeAudioSettings} from "./audio-engine.mjs";
 
 const state={tab:"landing",imageData:"",videoBlob:null,videoUrl:"",musicFile:null,voiceFile:null};
-const ASSET_KEY="affiliai_ultra_assets_v1";\nconst SETTINGS_KEY="affiliai_ultra_settings_v1";\nconst settings=loadSettings();
+const ASSET_KEY="affiliai_ultra_assets_v1";
+const SETTINGS_KEY="affiliai_ultra_settings_v1";
+const settings=loadSettings();
 let assets=loadAssets();const $=id=>document.getElementById(id);
 
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");state.tab=b.dataset.tab;$( "visual").classList.toggle("hidden",state.tab!=="image");updateTitle()});
@@ -21,7 +23,11 @@ $("aiVideoBtn").onclick=generateAIVideo;
 $("convertMp4Btn").onclick=convertMp4;
 $("downloadVideoBtn").onclick=downloadVideo;
 
-function loadSettings(){try{return JSON.parse(localStorage.getItem(SETTINGS_KEY)||"{}")}catch{return{}}}\nfunction saveSettings(){localStorage.setItem(SETTINGS_KEY,JSON.stringify({openaiApiKey:$("openaiKey").value.trim(),runwayApiSecret:$("runwayKey").value.trim()}));$("notice").textContent="AI settings saved on this PC."}\n$("openaiKey").value=settings.openaiApiKey||"";$("runwayKey").value=settings.runwayApiSecret||"";$("saveSettings").onclick=saveSettings;\nfunction auth(){return{openaiApiKey:$("openaiKey").value.trim(),runwayApiSecret:$("runwayKey").value.trim()}}\nfunction data(){return{n:$("productName").value.trim()||"Smart Home Security Product",u:$("affiliateUrl").value.trim()||"[INSERT AFFILIATE LINK]",d:$("description").value.trim()||"Modern security technology designed to support a safer, more connected home.",m:$("market").value,c:$("channel").value}}
+function loadSettings(){try{return JSON.parse(localStorage.getItem(SETTINGS_KEY)||"{}")}catch{return{}}}
+function saveSettings(){localStorage.setItem(SETTINGS_KEY,JSON.stringify({openaiApiKey:$("openaiKey").value.trim(),runwayApiSecret:$("runwayKey").value.trim()}));$("notice").textContent="AI settings saved on this PC."}
+$("openaiKey").value=settings.openaiApiKey||"";$("runwayKey").value=settings.runwayApiSecret||"";$("saveSettings").onclick=saveSettings;
+function auth(){return{openaiApiKey:$("openaiKey").value.trim(),runwayApiSecret:$("runwayKey").value.trim()}}
+function data(){return{n:$("productName").value.trim()||"Smart Home Security Product",u:$("affiliateUrl").value.trim()||"[INSERT AFFILIATE LINK]",d:$("description").value.trim()||"Modern security technology designed to support a safer, more connected home.",m:$("market").value,c:$("channel").value}}
 
 function updateTitle(){const x={landing:"Premium Landing Page",tiktok:"TikTok • 9:16",facebook:"Facebook Campaign",pinterest:"Pinterest Pin",image:"Marketing Image"};$("outputTitle").textContent=x[state.tab]}
 
@@ -60,7 +66,8 @@ async function generateAIVideo(){
 
 async function downloadAIVideo(url,taskId=""){try{const endpoint=taskId?"/api/video-download/"+encodeURIComponent(taskId):url;const r=await fetch(endpoint,{headers:taskId?{"x-runway-api-secret":$("runwayKey").value.trim()}:undefined});if(!r.ok)throw Error();const blob=await r.blob();const u=URL.createObjectURL(blob);const a=document.createElement("a");a.href=u;a.download="affiliai-ultra-ai-video.mp4";document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);$("notice").textContent="AI video download started."}catch(e){window.open(url,"_blank");$("notice").textContent="The provider opened the video because direct download was blocked by the browser."}}
 
-async function downloadAsset(url,name){try{const r=await fetch(url);if(!r.ok)throw Error();const blob=await r.blob();const u=URL.createObjectURL(blob);const a=document.createElement("a");a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u)}catch{window.open(url,"_blank")}}\nfunction loadAssets(){try{return JSON.parse(localStorage.getItem(ASSET_KEY)||"[]")}catch{return[]}}
+async function downloadAsset(url,name){try{const r=await fetch(url);if(!r.ok)throw Error();const blob=await r.blob();const u=URL.createObjectURL(blob);const a=document.createElement("a");a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u)}catch{window.open(url,"_blank")}}
+function loadAssets(){try{return JSON.parse(localStorage.getItem(ASSET_KEY)||"[]")}catch{return[]}}
 function saveAssets(){localStorage.setItem(ASSET_KEY,JSON.stringify(assets.slice(0,100)))}
 function renderAssetGallery(){const box=$("assetGallery"),empty=$("emptyAssets");if(!box)return;const filtered=filterAssets(assets,{type:$("assetTypeFilter")?.value||"all",product:$("assetSearch")?.value||""});box.replaceChildren();$("assetCount").textContent=assets.length;empty.classList.toggle("hidden",filtered.length>0);filtered.forEach(asset=>{const card=document.createElement("article");card.className="asset-card";const media=asset.type==="video"?document.createElement("video"):document.createElement("img");media.src=asset.url;media.controls=asset.type==="video";media.alt=asset.title;media.className="asset-media";card.append(media);const meta=document.createElement("div");meta.className="asset-meta";meta.innerHTML=`<span>${assetTypeLabel(asset.type)}</span><b></b><small>${new Date(asset.createdAt).toLocaleString()}</small>`;meta.querySelector("b").textContent=asset.product;const actions=document.createElement("div");actions.className="asset-actions";const open=document.createElement("a");open.href=asset.url;open.target="_blank";open.textContent="Preview";const dl=document.createElement("button");dl.textContent="Download";dl.onclick=()=>asset.type==="video"?downloadAIVideo(asset.url,asset.taskId):downloadAsset(asset.url,"affiliai-ultra-ai-image.png");const copy=document.createElement("button");copy.textContent="Copy Affiliate";copy.onclick=()=>navigator.clipboard.writeText(asset.affiliateUrl);actions.append(open,dl,copy);card.append(meta,actions);box.append(card)})}
 $("assetTypeFilter")?.addEventListener("change",renderAssetGallery);$("assetSearch")?.addEventListener("input",renderAssetGallery);$("clearAssets")?.addEventListener("click",()=>{if(confirm("Clear the AI asset library?")){assets=[];saveAssets();renderAssetGallery()}});
