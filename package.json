@@ -38,6 +38,9 @@
       ],
       "artifactName": "AffiliAI-Ultra-${version}-Win7-x64.${ext}"
     },
-    "artifactName": "AffiliAI-Ultra-${version}-${arch}.${ext}"
+    "artifactName": "AffiliAI-Ultra-${version}-Win7-x64.${ext}",
+    "asarUnpack": [
+      "node_modules/ffmpeg-static/**"
+    ]
   }
 }
