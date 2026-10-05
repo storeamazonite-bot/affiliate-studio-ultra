@@ -18,6 +18,11 @@ jobs:
       - run: npm test
       - run: node --check server.js
       - run: node --check app.js
+      - run: node --check electron-main.cjs
+      - run: node --check ai-creative.mjs
+      - run: node --check ai-assets.mjs
+      - run: node --check video-engine.mjs
+      - run: node --check audio-engine.mjs
       - run: npm run dist
       - uses: actions/upload-artifact@v4
         with:
