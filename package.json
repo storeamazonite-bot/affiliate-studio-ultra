@@ -1,6 +1,6 @@
 {
   "name": "affiliate-studio-ultra",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -10,7 +10,6 @@
     "dist": "electron-builder --win dir"
   },
   "dependencies": {
-    "ffmpeg-static": "^5.2.0",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
@@ -39,8 +38,6 @@
       "artifactName": "AffiliAI-Ultra-${version}-Win7-x64.${ext}"
     },
     "artifactName": "AffiliAI-Ultra-${version}-Win7-x64.${ext}",
-    "asarUnpack": [
-      "node_modules/ffmpeg-static/**"
-    ]
+    "asarUnpack": []
   }
 }
