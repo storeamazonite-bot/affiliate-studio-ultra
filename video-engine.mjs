@@ -1,6 +1,6 @@
 const clean=value=>String(value??"").trim();
 
-export function createVideoTimeline({product,description,affiliateUrl,durationSec=15,width=540,height=960}={}){
+export function createVideoTimeline({product,description,affiliateUrl,durationSec=22,width=1080,height=1920}={}){
   const name=clean(product)||"Smart Home Security Product";
   const detail=clean(description)||"Modern security technology for a more connected home.";
   const link=clean(affiliateUrl)||"[INSERT AFFILIATE LINK]";
