@@ -12,6 +12,7 @@ const ASSET_KEY="affiliai_ultra_assets_v1";
 const SETTINGS_KEY="affiliai_ultra_settings_v1";
 const settings=loadSettings();
 let assets=loadAssets();const $=id=>document.getElementById(id);
+const performanceMode=$("performanceMode");if(performanceMode){performanceMode.value=perf.mode||"auto";performanceMode.onchange=()=>{perf.mode=performanceMode.value;localStorage.setItem(PERF_KEY,JSON.stringify(perf));$("notice").textContent="Video performance mode saved. Windows 7 Auto uses the Lite profile.";}}
 
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");state.tab=b.dataset.tab;$( "visual").classList.toggle("hidden",state.tab!=="image");updateTitle()});
 
