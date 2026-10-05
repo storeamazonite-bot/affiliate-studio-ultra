@@ -52,3 +52,7 @@ Every Windows build runs:
 - artifact verification
 
 The final executable is produced as a Windows x64 portable application.
+
+
+## CI validation
+Windows 7 compatibility changes are validated through the packaged desktop smoke test before release artifacts are published.
