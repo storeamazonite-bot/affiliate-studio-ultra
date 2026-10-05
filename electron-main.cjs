@@ -1,28 +1,27 @@
-const {app,BrowserWindow,shell}=require("electron");
-const {spawn}=require("child_process");
+const {app,BrowserWindow,shell,utilityProcess}=require("electron");
 const path=require("path");
 
 let child=null;
+let output="";
 
 function startBackend(){
   return new Promise((resolve,reject)=>{
     const root=__dirname;
-    child=spawn(process.execPath,[path.join(root,"server.js")],{
+    child=utilityProcess.fork(path.join(root,"backend-launcher.cjs"),[],{
       cwd:root,
-      env:{...process.env,ELECTRON_RUN_AS_NODE:"1",PORT:"0"},
-      stdio:["ignore","pipe","pipe"],
-      windowsHide:true
+      env:{...process.env,PORT:"0"},
+      stdio:"pipe",
+      serviceName:"AffiliAI Ultra Backend"
     });
-    let output="";
     const onData=(d)=>{
       output+=d.toString();
       const m=output.match(/http:\/\/localhost:(\d+)/);
-      if(m){child.stdout.removeListener("data",onData);resolve(Number(m[1]));}
+      if(m){child.stdout?.removeListener("data",onData);resolve(Number(m[1]));}
     };
-    child.stdout.on("data",onData);
-    child.stderr.on("data",d=>{output+=d.toString()});
-    child.on("error",reject);
-    child.on("exit",(code)=>{if(code&&code!==0)reject(new Error("Backend exited: "+code+" "+output))});
+    child.stdout?.on("data",onData);
+    child.stderr?.on("data",d=>{output+=d.toString()});
+    child.on("spawn",()=>{});
+    child.on("exit",code=>{if(code&&code!==0)reject(new Error("Backend exited: "+code+" "+output))});
   });
 }
 
@@ -40,5 +39,5 @@ app.whenReady().then(async()=>{
   });
 }).catch(err=>{console.error(err);app.quit()});
 
-app.on("before-quit",()=>{if(child)child.kill()});
+app.on("before-quit",()=>{try{child?.kill()}catch{}});
 app.on("window-all-closed",()=>{if(process.platform!=="darwin")app.quit()});
